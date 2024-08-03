@@ -8,7 +8,7 @@ from udemy_scraper.config.settings import mysql_config
 if __name__ == "__main__":
     driver_path = r"C:\Users\user\OneDrive\Documents\chromedriver-win64\chromedriver.exe"
     base_url = "https://www.udemy.com/courses/search/?"
-    output_csv = "subcategory_courses.csv"
+    output_csv = r"C:\Users\user\OneDrive\Documents\DMN\subcategory_courses.csv"
     num_pages = 100
     categories = {
     "Development": [
@@ -56,19 +56,19 @@ if __name__ == "__main__":
     #     "Operating Systems & Servers",
     #     "Other IT & Software"
     # ],
-    # "Office Productivity": [
+    "Office Productivity": [
     #     "Microsoft",
     #     "Apple",
     #     "Google",
     #     "SAP",
     #     "Oracle",
-    #     "Other Office Productivity" run again
-    # ],
+        # "Other Office Productivity" 
+    ],
     # "Personal Development": [
     #     "Personal Transformation",
     #     "Productivity",
     #     "Leadership",
-        # "Personal Finance", run again
+        # "Personal Finance", 
     #     "Career Development",
     #     "Parenting & Relationships",
     #     "Happiness",
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     #     "Motivation",
     #     "Other Personal Development"
     # ],
-    "Design": [
+    # "Design": [
     #     "Web Design",
     #     "Graphic Design",
         # "Design Tools",
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         # "Architectural Design",
         # "Interior Design",
         # "Other Design"
-    ],
+    # ],
     # "Marketing": [
         # "Digital Marketing",
         # "Search Engine Optimization",
@@ -122,60 +122,52 @@ if __name__ == "__main__":
     #     "Travel",
     #     "Other Lifestyle"
     # ],
-    "Photography & Video": [
+    # "Photography & Video": [
     #     "Digital Photography",
     #     "Photography Tools",
     #     "Photography Fundamentals",
-    #     "Portrait Photography", 11 PAGES
-        # "Photography Techniques", run againn
-        # "Commercial Photography", not sure
-        "Video Design",
-        "Other Photography & Video"
-    ],
-    "Health & Fitness": [
-        "Fitness",
-        "General Health",
-        "Sports",
-        "Nutrition",
-        "Yoga",
-        "Mental Health",
-        "Dieting",
-        "Self Defense",
-        "Safety & First Aid",
-        "Dance",
-        "Meditation",
-        "Other Health & Fitness"
-    ],
-    "Music": [
-        "Instruments",
-        "Music Production",
-        "Music Fundamentals",
-        "Vocal",
-        "Music Software",
-        "Other Music"
-    ],
-    "Teaching & Academics": [
-        "Engineering",
-        "Humanities",
-        "Math",
-        "Science",
-        "Online Education",
-        "Social Science",
-        "Language Learning",
-        "Teacher Training",
-        "Test Prep",
-        "Other Teaching & Academics"
-    ]
+    #     "Portrait Photography", 
+        # "Photography Techniques",
+        # "Commercial Photography",
+        # "Video Design", 
+        # "Other Photography & Video"
+    # ],
+    # "Health & Fitness": [
+    #     "Fitness",
+    #     "General Health",
+    #     "Sports",
+    #     "Nutrition",
+    #     "Yoga",
+    #     "Mental Health",
+    #     "Dieting",
+    #     "Self Defense",
+    #     "Safety & First Aid",
+    #     "Dance",
+    #     "Meditation",
+    #     "Other Health & Fitness"
+    # ],
+    # "Music": [
+    #     "Instruments",
+    #     "Music Production",
+    #     "Music Fundamentals",
+    #     "Vocal",
+    #     "Music Software",
+    #     "Other Music"
+    # ],
+    # "Teaching & Academics": [
+    #     "Engineering",
+    #     "Humanities",
+    #     "Math",
+    #     "Science",
+    #     "Online Education",
+    #     "Social Science",
+    #     "Language Learning",
+    #     "Teacher Training",
+    #     "Test Prep",
+    #     "Other Teaching & Academics"
+    # ]
 }
 
-
-    scraper = UdemyScraper(driver_path, base_url, output_csv, num_pages, categories)
-    scraper.run()
-    
-    # instructor_csv = r'C:\Users\user\OneDrive\Documents\DMN\instructor_split.csv'
-    courses_csv = r'C:\Users\user\OneDrive\Documents\DMN\selenium udemy\subcategory_courses.csv'  # Update the path as needed
-    
     db_manager = DatabaseManager(mysql_config)
-    db_manager.connect()
-    db_manager.insert_courses_from_csv(courses_csv)
-    db_manager.disconnect()
+    scraper = UdemyScraper(driver_path, base_url, output_csv, num_pages, categories, db_manager)
+    scraper.run()

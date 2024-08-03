@@ -9,8 +9,11 @@ class DatabaseManager:
         self.cursor = None
 
     def connect(self):
-        self.conn = mysql.connector.connect(**self.config)
-        self.cursor = self.conn.cursor()
+        try:
+            self.conn = mysql.connector.connect(**self.config)
+            self.cursor = self.conn.cursor()
+        except mysql.connector.Error as err:
+            print(f"Error connecting to database: {err}")
 
     def disconnect(self):
         if self.cursor:
@@ -74,3 +77,30 @@ class DatabaseManager:
                 row['original_price']
             )
             self.insert_course(course_data)
+            
+    def read_course_urls_from_db(self):
+        query = """
+        SELECT c.course_url
+        FROM initial_courses AS c 
+        LEFT OUTER JOIN initial_instructor AS i ON c.course_url = i.course_url
+        WHERE i.instructor_profile_urls IS NULL and c.category="Marketing";
+        """
+        try:
+            self.cursor.execute(query)
+            return [row[0] for row in self.cursor.fetchall()]
+        except mysql.connector.Error as err:
+            print(f"Error reading from database: {err}")
+            return []
+
+    def insert_instructor_data(self, instructor_data):
+        insert_query = """
+        INSERT INTO initial_instructor (course_url, instructor_image_urls, instructor_profile_urls, description)
+        VALUES (%s, %s, %s, %s)
+        """
+        try:
+            for data in instructor_data:
+                self.cursor.execute(insert_query, (data['course_url'], data['instructor_image_urls'], data['instructor_profile_urls'],data['course_desc']))
+            self.conn.commit()
+        except mysql.connector.Error as err:
+            print(f"Error inserting data: {err}")
+            self.conn.rollback()

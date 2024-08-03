@@ -180,20 +180,20 @@ class UdemyScraper:
         self.course_urls1=[]
 
     def run(self):
-        try:
-            for category in self.categories:
-                print(category)
-                self.scrape_category(category)
-        finally:
-            self.save_all_courses_to_csv()
-            #self.fetch_instructor_data()
-            self.driver_manager.close_driver()
+        # try:
+        #     for category in self.categories:
+        #         print()
+        #         # self.scrape_category(category)
+        # finally:
+        #     # self.save_all_courses_to_csv()
+        self.fetch_instructor_data()
+        self.driver_manager.close_driver()
 
     def scrape_category(self, category):
         try:
             for subcategory in self.categories.get(category, []):
-                self.num_pages=100
-                for page in range(5, self.num_pages + 1):
+                self.num_pages=11
+                for page in range(1, self.num_pages + 1):
                     try:
                         # URL encode subcategory
                         encoded_subcategory = urllib.parse.quote(subcategory)
@@ -215,32 +215,38 @@ class UdemyScraper:
             print(f"Couldn't get category {category}: {e}")
 
     def fetch_instructor_data(self):
+        instructor_data = []
+        course_urls1 = self.read_course_urls_from_csv(r'C:\Users\user\OneDrive\Documents\DMN\selenium udemy\course_urls.csv')
+    
+        
         try:
-            instructor_data = []
-            course_urls1=self.read_course_urls_from_csv('instructors.csv')
             for course_url in course_urls1:
                 try:
                     instructor_image_urls, instructor_profile_urls = self.get_instructor_urls(course_url)
-                    instructor_data.append({
-                        "course_url": course_url,
-                        "instructor_image_urls": instructor_image_urls,
-                        "instructor_profile_urls": instructor_profile_urls
-                    })
-                except:
-                    continue
-            
-            # Write instructor data to CSV
-            instructor_csv = 'instructors1.csv'
-            with open(instructor_csv, 'a', newline='', encoding='utf-8') as csvfile:
-                fieldnames = ["course_url", "instructor_image_urls", "instructor_profile_urls"]
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                #writer.writeheader()
-                writer.writerows(instructor_data)
-            
-            print(f"Instructor data saved to {instructor_csv}")
-        
+                    if instructor_image_urls != "not available" and instructor_profile_urls != "not available":
+                        instructor_data.append({
+                            "course_url": course_url,
+                            "instructor_image_urls": instructor_image_urls,
+                            "instructor_profile_urls": instructor_profile_urls
+                        })
+                except Exception as e:
+                    print(f"WebDriver exception while processing course URL {course_url}: {e}")
+                    break
         except Exception as e:
-            print(f"Error fetching instructor data: {e}")
+            print(f"WebDriver exception while processing course URL {course_url}: {e}")
+        finally:    
+            # Write instructor data to CSV
+            instructor_csv = r'C:\Users\user\OneDrive\Documents\DMN\selenium udemy\udemy_scraper\instructor_data.csv'
+            try:
+                with open(instructor_csv, 'a', newline='', encoding='utf-8') as csvfile:
+                    fieldnames = ["course_url", "instructor_image_urls", "instructor_profile_urls"]
+                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                    if csvfile.tell() == 0:  # Check if file is empty to write the header
+                        writer.writeheader()
+                    writer.writerows(instructor_data)
+                print(f"Instructor data saved to {instructor_csv}")
+            except Exception as e:
+                print(f"Error writing instructor data to CSV: {e}")
 
     def get_instructor_urls(self, course_url):
         try:
@@ -272,6 +278,9 @@ class UdemyScraper:
                 instructor_profile_url = 'https://www.udemy.com' + profile_link['href'] if profile_link else None
                 if instructor_profile_url:
                     instructor_profile_urls.append(instructor_profile_url)
+                    
+                # course_desc = soup.select_one('div[data-purpose="safely-set-inner-html:description:description"]').get_text(separator='\n')
+                # print(course_desc)
             
             # Navigate back to the previous search results page
             self.driver_manager.driver.back()
@@ -279,7 +288,7 @@ class UdemyScraper:
             # Concatenate URLs into a single string
             instructor_image_urls_str = ";".join(instructor_image_urls)
             instructor_profile_urls_str = ";".join(instructor_profile_urls)
-            
+            print(instructor_image_urls_str, instructor_profile_urls_str)
             return instructor_image_urls_str, instructor_profile_urls_str
         
         except Exception as e:
@@ -317,7 +326,7 @@ class UdemyScraper:
 if __name__ == "__main__":
     driver_path = r"C:\Users\user\OneDrive\Documents\chromedriver-win64\chromedriver.exe"
     base_url = "https://www.udemy.com/courses/search/?"
-    output_csv = "subcategory_courses.csv"
+    output_csv = r"C:\Users\user\OneDrive\Documents\DMN\subcategory_courses.csv"
     num_pages = 100
     categories = {
     "Development": [
@@ -365,19 +374,19 @@ if __name__ == "__main__":
     #     "Operating Systems & Servers",
     #     "Other IT & Software"
     # ],
-    # "Office Productivity": [
+    "Office Productivity": [
     #     "Microsoft",
     #     "Apple",
     #     "Google",
     #     "SAP",
     #     "Oracle",
-    #     "Other Office Productivity" run again
-    # ],
+        # "Other Office Productivity" 
+    ],
     # "Personal Development": [
     #     "Personal Transformation",
     #     "Productivity",
     #     "Leadership",
-        # "Personal Finance", run again
+        # "Personal Finance", 
     #     "Career Development",
     #     "Parenting & Relationships",
     #     "Happiness",
@@ -392,7 +401,7 @@ if __name__ == "__main__":
     #     "Motivation",
     #     "Other Personal Development"
     # ],
-    "Design": [
+    # "Design": [
     #     "Web Design",
     #     "Graphic Design",
         # "Design Tools",
@@ -403,7 +412,7 @@ if __name__ == "__main__":
         # "Architectural Design",
         # "Interior Design",
         # "Other Design"
-    ],
+    # ],
     # "Marketing": [
         # "Digital Marketing",
         # "Search Engine Optimization",
@@ -431,50 +440,50 @@ if __name__ == "__main__":
     #     "Travel",
     #     "Other Lifestyle"
     # ],
-    "Photography & Video": [
+    # "Photography & Video": [
     #     "Digital Photography",
     #     "Photography Tools",
     #     "Photography Fundamentals",
-    #     "Portrait Photography", 11 PAGES
-        # "Photography Techniques", run againn
-        # "Commercial Photography", not sure
-        "Video Design",
-        "Other Photography & Video"
-    ],
-    "Health & Fitness": [
-        "Fitness",
-        "General Health",
-        "Sports",
-        "Nutrition",
-        "Yoga",
-        "Mental Health",
-        "Dieting",
-        "Self Defense",
-        "Safety & First Aid",
-        "Dance",
-        "Meditation",
-        "Other Health & Fitness"
-    ],
-    "Music": [
-        "Instruments",
-        "Music Production",
-        "Music Fundamentals",
-        "Vocal",
-        "Music Software",
-        "Other Music"
-    ],
-    "Teaching & Academics": [
-        "Engineering",
-        "Humanities",
-        "Math",
-        "Science",
-        "Online Education",
-        "Social Science",
-        "Language Learning",
-        "Teacher Training",
-        "Test Prep",
-        "Other Teaching & Academics"
-    ]
+    #     "Portrait Photography", 
+        # "Photography Techniques",
+        # "Commercial Photography",
+        # "Video Design", 
+        # "Other Photography & Video"
+    # ],
+    # "Health & Fitness": [
+    #     "Fitness",
+    #     "General Health",
+    #     "Sports",
+    #     "Nutrition",
+    #     "Yoga",
+    #     "Mental Health",
+    #     "Dieting",
+    #     "Self Defense",
+    #     "Safety & First Aid",
+    #     "Dance",
+    #     "Meditation",
+    #     "Other Health & Fitness"
+    # ],
+    # "Music": [
+    #     "Instruments",
+    #     "Music Production",
+    #     "Music Fundamentals",
+    #     "Vocal",
+    #     "Music Software",
+    #     "Other Music"
+    # ],
+    # "Teaching & Academics": [
+    #     "Engineering",
+    #     "Humanities",
+    #     "Math",
+    #     "Science",
+    #     "Online Education",
+    #     "Social Science",
+    #     "Language Learning",
+    #     "Teacher Training",
+    #     "Test Prep",
+    #     "Other Teaching & Academics"
+    # ]
 }
 
 
